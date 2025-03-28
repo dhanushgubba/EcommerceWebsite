@@ -1,39 +1,29 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBars, FaTimes } from 'react-icons/fa'; // Import icons
 import './Navbar.css';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 const Navbar = () => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="container">
-      <a href="/">
-        <h2 className="name-container">SRI SAI ENTERPRISES</h2>
-      </a>
-
-      <div className="hamburger" onClick={() => setIsMobile(!isMobile)}>
-        {isMobile ? <FaTimes /> : <FaBars />}
-      </div>
-
-      <div className={isMobile ? 'nav-links mobile-menu' : 'nav-links'}>
-        <Link to="/" onClick={() => setIsMobile(false)}>
-          Home
-        </Link>
-        <Link to="/about" onClick={() => setIsMobile(false)}>
-          About
-        </Link>
-        <Link to="/products" onClick={() => setIsMobile(false)}>
-          Products
-        </Link>
-        <Link to="/contact" onClick={() => setIsMobile(false)}>
-          Contact
-        </Link>
-        <button className="btn-login" onClick={() => setIsMobile(false)}>
+    <nav className="navbar">
+      <h2 className="logo">PSDS</h2>
+      <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
+        <Link to="/">Home</Link>
+        <Link to="/shop">Shop</Link>
+        <Link to="/categories">Categories</Link>
+        <Link to="/offers">Offers</Link>
+        <Link to="/about">About</Link>
+        <Link to="/contact">Contact</Link>
+        <Link to="/login" className="btn-login">
           Login
-        </button>
+        </Link>
       </div>
-    </div>
+      <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+        {menuOpen ? <FaTimes /> : <FaBars />}
+      </div>
+    </nav>
   );
 };
 
