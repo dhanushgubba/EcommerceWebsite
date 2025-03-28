@@ -20,6 +20,7 @@
   font-size: 18pt;
 }
 
+/* Navigation links */
 .nav-links {
   display: flex;
   align-items: center;
@@ -38,6 +39,7 @@
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Button */
 .btn-login {
   background-color: greenyellow;
   font-size: 12pt;
@@ -51,4 +53,35 @@
 
 .btn-login:hover {
   background-color: limegreen;
+}
+
+/* Hamburger Icon */
+.hamburger {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Mobile styles */
+@media screen and (max-width: 768px) {
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: white;
+    width: 100%;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px 0;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-links.mobile-menu {
+    display: flex;
+  }
+
+  .hamburger {
+    display: block;
+  }
 }
