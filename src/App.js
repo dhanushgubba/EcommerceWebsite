@@ -7,11 +7,13 @@ import {
 } from 'react-router-dom';
 import Home from './Pages/Home';
 import Navbar from './Components/Navbar';
+import Login from './Pages/Login';
+import Register from './Pages/Register';
 
 const App = () => {
   const Layout = () => {
     const location = useLocation();
-    const showNavbar = ['/'].includes(location.pathname);
+    const showNavbar = ['/', '/login', '/register'].includes(location.pathname);
 
     return (
       <>
@@ -19,6 +21,8 @@ const App = () => {
 
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </>
     );

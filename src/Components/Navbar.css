@@ -16,7 +16,7 @@
   display: flex;
   gap: 20px;
   font-size: 14pt;
-  font-weight: boldz;
+  font-weight: bold;
 }
 
 .nav-links a {
@@ -25,7 +25,10 @@
 }
 
 .nav-links a:hover {
-  text-decoration: dashed;
+  background-color: black;
+  text-decoration: none;
+  color: white;
+  border-radius: 15px;
 }
 
 .btn-login {
@@ -65,4 +68,24 @@
   .hamburger {
     display: block;
   }
+}
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.text-box {
+  width: 450px;
+  padding: 8px;
+  padding-right: 35px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  color: gray;
+  cursor: pointer;
 }
