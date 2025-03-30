@@ -5,17 +5,16 @@ const Register = () => {
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [repassword, setRePassword] = useState('');
-
   const [otpSent, setOtpSent] = useState(false);
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePhone = (phone) => /^\d{10}$/.test(phone);
 
   const checkPasswordStrength = (password) => {
     const hasUpperCase = /[A-Z]/.test(password);
@@ -37,84 +36,97 @@ const Register = () => {
     return 'strong';
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    switch (name) {
-      case 'firstname':
-        setFirstName(value);
-        break;
-      case 'lastname':
-        setLastName(value);
-        break;
-      case 'email':
-        setEmail(value);
-        break;
-      case 'phone':
-        setPhone(value);
-        break;
-      case 'otp':
-        setOtp(value);
-        break;
-      case 'password':
-        setPassword(value);
-        setPasswordStrength(value ? checkPasswordStrength(value) : '');
-        break;
-      case 'repassword':
-        setRePassword(value);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleSendOTP = () => {
-    if (!validatePhone(phone)) {
-      alert('Please enter a valid 10-digit phone number');
+  const handleSendOTP = async () => {
+    if (!validateEmail(email)) {
+      alert('Please enter a valid email address');
       return;
     }
-    setOtpSent(true);
-    alert('OTP sent successfully!');
+
+    try {
+      const response = await fetch(
+        `http://localhost:8082/otp/generate?email=${email}`,
+        { method: 'POST' }
+      );
+      const message = await response.text();
+      alert(message);
+      setOtpSent(true);
+      setIsOtpVerified(false); // Reset OTP verification status
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to send OTP');
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleVerifyOTP = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8082/otp/verify?email=${email}&otp=${otp}`,
+        { method: 'POST' }
+      );
+      const message = await response.text();
+      alert(message);
+      if (message.toLowerCase().includes('verified')) {
+        setIsOtpVerified(true);
+      } else {
+        setIsOtpVerified(false);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to verify OTP');
+    }
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isOtpVerified) {
+      alert('Please verify the OTP before registering.');
+      return;
+    }
     if (
       !firstname ||
       !lastname ||
       !email ||
       !phone ||
-      !otp ||
       !password ||
       !repassword
     ) {
       alert('All fields are required.');
       return;
     }
-
     if (!validateEmail(email)) {
       alert('Invalid email format.');
       return;
     }
-
-    if (!validatePhone(phone)) {
-      alert('Invalid phone number.');
-      return;
-    }
-
     if (password !== repassword) {
       alert('Passwords do not match.');
       return;
     }
 
-    setIsSubmitting(true);
-
-    console.log({ firstname, lastname, email, phone, otp, password });
-
-    setTimeout(() => {
-      alert('Registration successful!');
+    try {
+      setIsSubmitting(true);
+      const userResponse = await fetch('http://localhost:8082/user/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstname, lastname, email, phone, password }),
+      });
+      const userMessage = await userResponse.text();
+      alert(userMessage);
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      setPhone('');
+      setOtp('');
+      setPassword('');
+      setRePassword('');
+      setOtpSent(false);
+      setIsOtpVerified(false);
+      setPasswordStrength('');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Registration failed');
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -122,124 +134,113 @@ const Register = () => {
       <h1>Register Here</h1>
       <form className="register-content" onSubmit={handleSubmit}>
         <div className="input-group">
-          <label htmlFor="firstname">First Name*</label>
+          <label htmlFor="firstname">First Name</label>
           <input
             type="text"
-            id="firstname"
             name="firstname"
             value={firstname}
-            onChange={handleChange}
-            placeholder="Enter your First Name"
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="First Name"
             required
           />
         </div>
-
         <div className="input-group">
-          <label htmlFor="lastname">Last Name*</label>
+          <label htmlFor="lastname">Last Name</label>
+
           <input
             type="text"
-            id="lastname"
             name="lastname"
             value={lastname}
-            onChange={handleChange}
-            placeholder="Enter your Last Name"
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Last Name"
             required
           />
         </div>
-
         <div className="input-group">
-          <label htmlFor="email">Email*</label>
+          <label htmlFor="email">Email</label>
           <input
             type="email"
-            id="email"
             name="email"
             value={email}
-            onChange={handleChange}
-            placeholder="Enter your Email"
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
             required
           />
         </div>
-
+        <button
+          className="otp-button"
+          type="button"
+          onClick={handleSendOTP}
+          disabled={otpSent}
+        >
+          {otpSent ? 'OTP Sent' : 'Send OTP'}
+        </button>
         <div className="input-group">
-          <label htmlFor="phone">Phone*</label>
-          <div className="otp-container">
-            <select
-              name="country-code"
-              id="country-code"
-              required
-              className="country-code"
-            >
-              <option value="+91">+91</option>
-              <option value="+1">+1</option>
-              <option value="+44">+44</option>
-            </select>
+          {otpSent && (
             <input
               type="text"
-              id="phone"
-              name="phone"
-              value={phone}
-              onChange={handleChange}
-              placeholder="Phone Number"
+              name="otp"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
               required
-              className="phone-input"
             />
+          )}
+          {otpSent && (
             <button
+              className="otp-buttons"
               type="button"
-              className="otp-button"
-              onClick={handleSendOTP}
-              disabled={otpSent}
+              onClick={handleVerifyOTP}
+              disabled={isOtpVerified}
             >
-              {otpSent ? 'OTP Sent' : 'Send OTP'}
+              {isOtpVerified ? 'OTP Verified' : 'Verify OTP'}
             </button>
-          </div>
+          )}
         </div>
-
         <div className="input-group">
-          <label htmlFor="otp">OTP*</label>
+          <label htmlFor="phone">Phone</label>
           <input
-            type="text"
-            id="otp"
-            name="otp"
-            value={otp}
-            onChange={handleChange}
-            placeholder="Enter the OTP"
+            type="tel"
+            name="phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Phone"
             required
           />
         </div>
-
         <div className="input-group">
-          <label htmlFor="password">Password*</label>
+          <label htmlFor="password">Password</label>
           <input
             type="password"
-            id="password"
             name="password"
             value={password}
-            onChange={handleChange}
-            placeholder="Enter your Password"
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setPasswordStrength(checkPasswordStrength(e.target.value));
+            }}
+            placeholder="Password"
             required
           />
-          <small>Password strength: {passwordStrength}</small>
         </div>
-
         <div className="input-group">
-          <label htmlFor="repassword">Confirm Password*</label>
+          <label htmlFor="repassword">Confirm Password</label>
+          <small>Password strength: {passwordStrength}</small>
           <input
             type="password"
-            id="repassword"
             name="repassword"
             value={repassword}
-            onChange={handleChange}
-            placeholder="Confirm your Password"
+            onChange={(e) => setRePassword(e.target.value)}
+            placeholder="Confirm Password"
             required
           />
         </div>
-
-        <button type="submit" className="submit-button" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating Account...' : 'Create Account'}
+        <button
+          className="submit-button"
+          type="submit"
+          disabled={isSubmitting || !isOtpVerified}
+        >
+          {isSubmitting ? 'Registering...' : 'Create Account'}
         </button>
-        <p className="register-link">
-          Already have an account? <a href="/login">Login Here</a>
-        </p>
       </form>
     </div>
   );
